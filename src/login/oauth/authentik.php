@@ -276,6 +276,23 @@ if ($user) {
         exit;
     }
 
+    // JIT Profile sync: Update email and names if they changed in Authentik
+    $updateData = [];
+    if (isset($userProfile->email) && strlen($userProfile->email) > 0) {
+        $updateData['users_email'] = strtolower($userProfile->email);
+        $updateData['users_emailVerified'] = ($userProfile->emailVerified == 1) ? 1 : 0;
+    }
+    if (isset($userProfile->firstName) && strlen($userProfile->firstName) > 0) {
+        $updateData['users_name1'] = $userProfile->firstName;
+    }
+    if (isset($userProfile->lastName) && strlen($userProfile->lastName) > 0) {
+        $updateData['users_name2'] = $userProfile->lastName;
+    }
+    if (count($updateData) > 0) {
+        $DBLIB->where("users_userid", $user['users_userid']);
+        $DBLIB->update("users", $updateData);
+    }
+
     // JIT role sync: blind-apply the group mapping both ways
     syncAuthentikInstanceRoles($user['users_userid'], $wantedPositionsInstance, $managedPositionsInstance);
     syncAuthentikServerRoles($user['users_userid'], $wantedPositionsServer, $managedPositionsServer);

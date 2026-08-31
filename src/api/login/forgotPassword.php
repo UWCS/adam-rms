@@ -7,6 +7,7 @@ if (isset($_POST['formInput'])) {
     else {
         if (filter_var($input, FILTER_VALIDATE_EMAIL)) $DBLIB->where ("users_email", $input);
         else $DBLIB->where ("users_username", $input);
+        $DBLIB->where("users_password", NULL, "IS NOT"); // Block OAuth-only accounts from creating passwords
         $user = $DBLIB->getOne("users",["users.users_userid"]);
         if (!$user) finish(true, null, true);
 
