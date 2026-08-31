@@ -537,7 +537,7 @@ $configStructureArray = [
       }
     ],
     "specialRequest" => false,
-    "default" => false,
+    "default" => "",
     "envFallback" => false,
   ],
   "AUTH_PROVIDERS_AUTHENTIK_KEYS_SECRET" => [
@@ -558,7 +558,7 @@ $configStructureArray = [
       }
     ],
     "specialRequest" => false,
-    "default" => false,
+    "default" => "",
     "envFallback" => false,
   ],
   "AUTH_PROVIDERS_AUTHENTIK_URL" => [
@@ -579,7 +579,7 @@ $configStructureArray = [
       }
     ],
     "specialRequest" => false,
-    "default" => false,
+    "default" => "",
     "envFallback" => false,
   ],
   "AUTH_PROVIDERS_AUTHENTIK_PROVIDER" => [
@@ -600,7 +600,7 @@ $configStructureArray = [
       }
     ],
     "specialRequest" => false,
-    "default" => false,
+    "default" => "",
     "envFallback" => false,
   ],
   "AUTH_PROVIDERS_AUTHENTIK_SCOPE" => [
@@ -663,7 +663,7 @@ $configStructureArray = [
       }
     ],
     "specialRequest" => false,
-    "default" => false,
+    "default" => "",
     "envFallback" => false,
   ],
   "AUTH_SESSION_LENGTH_HOURS" => [
