@@ -127,6 +127,54 @@ function syncAuthentikInstanceRoles($userId, $wantedPositions, $managedPositions
     }
 }
 
+/**
+ * Blind-apply the Authentik group -> server position mapping.
+ *
+ * Adds a userPositions row for every global server position a group grants,
+ * and hard-deletes rows for server positions the user no longer holds.
+ */
+function syncAuthentikServerRoles($userId, $wantedPositions, $managedPositions)
+{
+    global $DBLIB;
+
+    if (count($managedPositions) < 1) return;
+
+    $DBLIB->where("users_userid", $userId);
+    $DBLIB->where("positions_id", $managedPositions, "IN");
+    $existing = $DBLIB->get("userPositions", null, ["userPositions_id", "positions_id"]);
+
+    $rowsByPosition = [];
+    foreach ($existing as $row) {
+        $rowsByPosition[$row['positions_id']][] = $row;
+    }
+
+    // Add rows for currently-held positions
+    foreach ($wantedPositions as $positionId => $label) {
+        $positionId = (int)$positionId;
+        if ($positionId < 1) continue;
+
+        if (isset($rowsByPosition[$positionId]) && count($rowsByPosition[$positionId]) > 0) {
+            continue; // Already holds this server role
+        }
+
+        $DBLIB->insert("userPositions", [
+            "users_userid" => $userId,
+            "positions_id" => $positionId,
+            "userPositions_start" => $DBLIB->now(),
+            "userPositions_end" => null
+        ]);
+    }
+
+    // Hard-delete rows whose server position is no longer held
+    foreach ($rowsByPosition as $positionId => $rows) {
+        if (isset($wantedPositions[$positionId])) continue;
+        foreach ($rows as $row) {
+            $DBLIB->where("userPositions_id", $row['userPositions_id']);
+            $DBLIB->delete("userPositions");
+        }
+    }
+}
+
 $PAGEDATA['pageConfig'] = ["TITLE" => "Login with UWCS"];
 
 $authentikUrl = $CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_URL");
@@ -179,15 +227,25 @@ foreach ((array)($userProfile->data['authentik_groups'] ?? []) as $group) {
 }
 $groups = array_values(array_unique($groups));
 
-// Roles: Authentik group name -> instancePositions_id
-$roleMap = json_decode($CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_INSTANCE_ROLE_MAP") ?: '{}', true);
-if (!is_array($roleMap)) $roleMap = [];
+// Instance Roles: Authentik group name -> instancePositions_id
+$roleMapInstance = json_decode($CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_INSTANCE_ROLE_MAP") ?: '{}', true);
+if (!is_array($roleMapInstance)) $roleMapInstance = [];
 
-$wantedPositions = [];
+$wantedPositionsInstance = [];
 foreach ($groups as $group) {
-    if (isset($roleMap[$group])) $wantedPositions[(int)$roleMap[$group]] = $group;
+    if (isset($roleMapInstance[$group])) $wantedPositionsInstance[(int)$roleMapInstance[$group]] = $group;
 }
-$managedPositions = array_values(array_unique(array_map('intval', array_values($roleMap))));
+$managedPositionsInstance = array_values(array_unique(array_map('intval', array_values($roleMapInstance))));
+
+// Server Roles: Authentik group name -> positions_id
+$roleMapServer = json_decode($CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_SERVER_ROLE_MAP") ?: '{}', true);
+if (!is_array($roleMapServer)) $roleMapServer = [];
+
+$wantedPositionsServer = [];
+foreach ($groups as $group) {
+    if (isset($roleMapServer[$group])) $wantedPositionsServer[(int)$roleMapServer[$group]] = $group;
+}
+$managedPositionsServer = array_values(array_unique(array_map('intval', array_values($roleMapServer))));
 
 $DBLIB->where("users_oauth_authentikid", $userProfile->identifier);
 $DBLIB->where("users_deleted", 0);
@@ -200,7 +258,8 @@ if ($user) {
     }
 
     // JIT role sync: blind-apply the group mapping both ways
-    syncAuthentikInstanceRoles($user['users_userid'], $wantedPositions, $managedPositions);
+    syncAuthentikInstanceRoles($user['users_userid'], $wantedPositionsInstance, $managedPositionsInstance);
+    syncAuthentikServerRoles($user['users_userid'], $wantedPositionsServer, $managedPositionsServer);
 
     //Log them in successfully
     $GLOBALS['AUTH']->generateToken($user['users_userid'], false, "Web - UWCS SSO", "web-session");
@@ -225,7 +284,7 @@ if ($CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_SIGNUP") !== 'Enabled') {
     echo $TWIG->render('login/error.twig', $PAGEDATA);
     exit;
 }
-if (count($wantedPositions) < 1) {
+if (count($wantedPositionsInstance) < 1 && count($wantedPositionsServer) < 1) {
     $PAGEDATA['ERROR'] = "Your UWCS account is not in a group with access to this system.";
     echo $TWIG->render('login/error.twig', $PAGEDATA);
     exit;
@@ -257,7 +316,8 @@ if (!$newUser) {
 $bCMS->auditLog("INSERT", "users", json_encode($data), null, $newUser);
 
 //Grant their roles immediately so the first login lands them in the right place
-syncAuthentikInstanceRoles($newUser, $wantedPositions, $managedPositions);
+syncAuthentikInstanceRoles($newUser, $wantedPositionsInstance, $managedPositionsInstance);
+syncAuthentikServerRoles($newUser, $wantedPositionsServer, $managedPositionsServer);
 
 $GLOBALS['AUTH']->generateToken($newUser, false, "Web - UWCS SSO", "web-session");
 header("Location: " . (isset($_SESSION['return']) ? $_SESSION['return'] : $CONFIG['ROOTURL']));

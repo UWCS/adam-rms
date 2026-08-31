@@ -188,6 +188,7 @@ Replace `YOURROOTURL` with the value of your Root URL setting.
 | Authentik Scope | `AUTH_PROVIDERS_AUTHENTIK_SCOPE` | Text | `openid profile email groups` | No | The OIDC scope requested from Authentik. Keep 'groups' so the role claim is returned. |
 | Authentik SSO Signup | `AUTH_PROVIDERS_AUTHENTIK_SIGNUP` | Select | `Enabled` | No | Create an AdamRMS account automatically for Authentik users in a mapped group on first login? (Independent of the global signup setting.) Options: `Enabled`, `Disabled`. |
 | Authentik Group Role Map | `AUTH_PROVIDERS_AUTHENTIK_INSTANCE_ROLE_MAP` | Text | -- | No | JSON mapping Authentik group names to AdamRMS instance position IDs, e.g. `{"uwcs-crew":4,"uwcs-tech-crew":5}`. Applied at login both ways. |
+| Authentik Server Role Map | `AUTH_PROVIDERS_AUTHENTIK_SERVER_ROLE_MAP` | Text | -- | No | JSON mapping Authentik group names to global AdamRMS server position IDs (e.g. Super-admin is 1), e.g. `{"uwcs-tech":1}`. Applied at login both ways. WARNING: This can grant global server takeover privileges. |
 
 :::note
 When configuring Authentik, set the redirect URI in the Authentik Provider to:

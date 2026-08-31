@@ -666,6 +666,27 @@ $configStructureArray = [
     "default" => "",
     "envFallback" => false,
   ],
+  "AUTH_PROVIDERS_AUTHENTIK_SERVER_ROLE_MAP" => [
+    "form" => [
+      "type" => "text",
+      "default" => function () {
+        return null;
+      },
+      "name" => "Authentik Server Role Map",
+      "group" => "Authentication",
+      "description" => "JSON mapping Authentik group names to AdamRMS server position IDs, e.g. {\"uwcs-tech\":1}. Applied at login both ways. WARNING: This can grant global Super Admin access.",
+      "required" => false,
+      "maxlength" => 2000,
+      "minlength" => 0,
+      "options" => [],
+      "verifyMatch" => function ($value, $options) {
+        return ["valid" => true, "value" => $value, "error" => ''];
+      }
+    ],
+    "specialRequest" => false,
+    "default" => "",
+    "envFallback" => false,
+  ],
   "AUTH_SESSION_LENGTH_HOURS" => [
     "form" => [
       "type" => "text",
