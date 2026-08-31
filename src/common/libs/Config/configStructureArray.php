@@ -519,6 +519,174 @@ $configStructureArray = [
     "default" => false,
     "envFallback" => false,
   ],
+  "AUTH_PROVIDERS_AUTHENTIK_KEYS_ID" => [
+    "form" => [
+      "type" => "text",
+      "default" => function () {
+        return null;
+      },
+      "name" => "Authentik Client ID",
+      "group" => "Authentication",
+      "description" => "The OAuth client ID from the Authentik provider.",
+      "required" => false,
+      "maxlength" => 255,
+      "minlength" => 0,
+      "options" => [],
+      "verifyMatch" => function ($value, $options) {
+        return ["valid" => true, "value" => $value, "error" => ''];
+      }
+    ],
+    "specialRequest" => false,
+    "default" => false,
+    "envFallback" => false,
+  ],
+  "AUTH_PROVIDERS_AUTHENTIK_KEYS_SECRET" => [
+    "form" => [
+      "type" => "secret",
+      "default" => function () {
+        return null;
+      },
+      "name" => "Authentik Client Secret",
+      "group" => "Authentication",
+      "description" => "The OAuth client secret from the Authentik provider.",
+      "required" => false,
+      "maxlength" => 255,
+      "minlength" => 0,
+      "options" => [],
+      "verifyMatch" => function ($value, $options) {
+        return ["valid" => true, "value" => $value, "error" => ''];
+      }
+    ],
+    "specialRequest" => false,
+    "default" => false,
+    "envFallback" => false,
+  ],
+  "AUTH_PROVIDERS_AUTHENTIK_URL" => [
+    "form" => [
+      "type" => "url",
+      "default" => function () {
+        return null;
+      },
+      "name" => "Authentik Base URL",
+      "group" => "Authentication",
+      "description" => "The base URL of the Authentik instance, e.g. https://auth.uwcs.co.uk",
+      "required" => false,
+      "maxlength" => 255,
+      "minlength" => 0,
+      "options" => [],
+      "verifyMatch" => function ($value, $options) {
+        return ["valid" => true, "value" => $value, "error" => ''];
+      }
+    ],
+    "specialRequest" => false,
+    "default" => false,
+    "envFallback" => false,
+  ],
+  "AUTH_PROVIDERS_AUTHENTIK_PROVIDER" => [
+    "form" => [
+      "type" => "text",
+      "default" => function () {
+        return null;
+      },
+      "name" => "Authentik Provider Slug",
+      "group" => "Authentication",
+      "description" => "The Authentik provider slug (the /application/o/{slug}/ URL segment).",
+      "required" => false,
+      "maxlength" => 100,
+      "minlength" => 0,
+      "options" => [],
+      "verifyMatch" => function ($value, $options) {
+        return ["valid" => true, "value" => $value, "error" => ''];
+      }
+    ],
+    "specialRequest" => false,
+    "default" => false,
+    "envFallback" => false,
+  ],
+  "AUTH_PROVIDERS_AUTHENTIK_SCOPE" => [
+    "form" => [
+      "type" => "text",
+      "default" => function () {
+        return 'openid profile email groups';
+      },
+      "name" => "Authentik Scope",
+      "group" => "Authentication",
+      "description" => "The OIDC scope requested from Authentik. Keep 'groups' so the role claim is returned.",
+      "required" => false,
+      "maxlength" => 255,
+      "minlength" => 0,
+      "options" => [],
+      "verifyMatch" => function ($value, $options) {
+        return ["valid" => true, "value" => $value, "error" => ''];
+      }
+    ],
+    "specialRequest" => false,
+    "default" => 'openid profile email groups',
+    "envFallback" => false,
+  ],
+  "AUTH_PROVIDERS_AUTHENTIK_SIGNUP" => [
+    "form" => [
+      "type" => "select",
+      "default" => function () {
+        return "Enabled";
+      },
+      "name" => "Authentik SSO Signup",
+      "group" => "Authentication",
+      "description" => "Create an AdamRMS account automatically for Authentik users in a mapped group on first login? (Independent of the global signup setting.)",
+      "required" => false,
+      "maxlength" => 255,
+      "minlength" => 5,
+      "options" => ["Enabled", "Disabled"],
+      "verifyMatch" => function ($value, $options) {
+        return ["valid" => in_array($value, $options), "value" => $value, "error" => in_array($value, $options) ? '' : "Invalid option selected"];
+      }
+    ],
+    "specialRequest" => false,
+    "default" => "Enabled",
+    "envFallback" => false,
+  ],
+  "AUTH_PROVIDERS_AUTHENTIK_INSTANCE_ROLE_MAP" => [
+    "form" => [
+      "type" => "text",
+      "default" => function () {
+        return null;
+      },
+      "name" => "Authentik Group Role Map",
+      "group" => "Authentication",
+      "description" => "JSON mapping Authentik group names to AdamRMS instance position IDs, e.g. {\"uwcs-crew\":4,\"uwcs-tech-crew\":5}. Applied at login both ways: groups no longer held have their position removed.",
+      "required" => false,
+      "maxlength" => 2000,
+      "minlength" => 0,
+      "options" => [],
+      "verifyMatch" => function ($value, $options) {
+        return ["valid" => true, "value" => $value, "error" => ''];
+      }
+    ],
+    "specialRequest" => false,
+    "default" => false,
+    "envFallback" => false,
+  ],
+  "AUTH_SESSION_LENGTH_HOURS" => [
+    "form" => [
+      "type" => "text",
+      "default" => function () {
+        return "12";
+      },
+      "name" => "Session Length (hours)",
+      "group" => "Security & Login",
+      "description" => "How long web and app login sessions last before requiring reauthentication. Lower values lock people out sooner after they lose access (Authentik reauth is silent while their SSO session is alive).",
+      "required" => false,
+      "maxlength" => 5,
+      "minlength" => 1,
+      "options" => [],
+      "verifyMatch" => function ($value, $options) {
+        return ["valid" => (is_numeric($value) && intval($value) > 0), "value" => strval(intval($value)), "error" => is_numeric($value) && intval($value) > 0 ? '' : "Must be a positive number of hours"];
+      }
+    ],
+    "specialRequest" => false,
+    "default" => "12",
+    "envFallback" => false,
+  ],
   "PROJECT_NAME" => [
     "form" => [
       "type" => "text",

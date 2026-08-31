@@ -119,6 +119,7 @@ Settings that control user signup and authentication security.
 | Setting | Key | Type | Default | Required | Description |
 |---------|-----|------|---------|----------|-------------|
 | User Signup | `AUTH_SIGNUP_ENABLED` | Select | `Enabled` | Yes | Whether new users can create an account. Disabling this means new users cannot sign up themselves. Options: `Enabled`, `Disabled`. |
+| Session Length (hours) | `AUTH_SESSION_LENGTH_HOURS` | Number | `12` | Yes | How long web and app login sessions last before requiring reauthentication. |
 | JWT Key | `AUTH_JWTKey` | Secret | Auto-generated (64 characters) | Yes | The key used for signing JWTs. Must be exactly 64 uppercase alphanumeric characters. If you are setting up AdamRMS for the first time, the generated default value will be fine. |
 | Next password hashing algorithm | `AUTH_NEXTHASH` | Select | `sha256` | No | The hashing algorithm to use for new passwords. Options: `sha256`, `sha512`. Changing this will not require users to change their passwords; the new algorithm is applied the next time a user changes their password. |
 | Content Security Policy | `CSP_ENABLED` | Select | `Disabled` | No | Whether to send a `Content-Security-Policy` header with every page response. Enabling this improves security but may block uploads to storage providers whose endpoints are not in the built-in allowlist (e.g. custom Backblaze B2 or MinIO endpoints). Disable if you experience network errors when uploading files. Options: `Enabled`, `Disabled`. |
@@ -134,6 +135,7 @@ If you are using a custom S3-compatible storage provider such as Backblaze B2 or
 | Setting | Validation | Env Fallback |
 |---------|-----------|--------------|
 | User Signup | Must be `Enabled` or `Disabled` | `CONFIG_SIGNUP_ENABLED` |
+| Session Length (hours) | Must be a positive number of hours | -- |
 | JWT Key | Exactly 64 characters, uppercase letters and digits only (`A-Z`, `0-9`) | `CONFIG_AUTH_JWTKey` |
 | Next password hashing algorithm | Must be `sha256` or `sha512` | -- |
 | Content Security Policy | Must be `Enabled` or `Disabled` | `CONFIG_CSP_ENABLED` |
@@ -173,6 +175,29 @@ When configuring Microsoft authentication, set the redirect URIs in the Azure Po
 - `https://YOURROOTURL/api/account/oauth-link/microsoft.php`
 
 Replace `YOURROOTURL` with the value of your Root URL setting.
+:::
+
+### Authentik (OpenID Connect) Authentication
+
+| Setting | Key | Type | Default | Required | Description |
+|---------|-----|------|---------|----------|-------------|
+| Authentik Client ID | `AUTH_PROVIDERS_AUTHENTIK_KEYS_ID` | Text | -- | No | The OAuth client ID from the Authentik provider. |
+| Authentik Client Secret | `AUTH_PROVIDERS_AUTHENTIK_KEYS_SECRET` | Secret | -- | No | The OAuth client secret from the Authentik provider. |
+| Authentik Base URL | `AUTH_PROVIDERS_AUTHENTIK_URL` | URL | -- | No | The base URL of the Authentik instance, e.g. `https://auth.uwcs.co.uk` |
+| Authentik Provider Slug | `AUTH_PROVIDERS_AUTHENTIK_PROVIDER` | Text | -- | No | The Authentik provider slug (the `/application/o/{slug}/` URL segment). |
+| Authentik Scope | `AUTH_PROVIDERS_AUTHENTIK_SCOPE` | Text | `openid profile email groups` | No | The OIDC scope requested from Authentik. Keep 'groups' so the role claim is returned. |
+| Authentik SSO Signup | `AUTH_PROVIDERS_AUTHENTIK_SIGNUP` | Select | `Enabled` | No | Create an AdamRMS account automatically for Authentik users in a mapped group on first login? (Independent of the global signup setting.) Options: `Enabled`, `Disabled`. |
+| Authentik Group Role Map | `AUTH_PROVIDERS_AUTHENTIK_INSTANCE_ROLE_MAP` | Text | -- | No | JSON mapping Authentik group names to AdamRMS instance position IDs, e.g. `{"uwcs-crew":4,"uwcs-tech-crew":5}`. Applied at login both ways. |
+
+:::note
+When configuring Authentik, set the redirect URI in the Authentik Provider to:
+- `https://YOURROOTURL/login/oauth/authentik.php`
+
+Replace `YOURROOTURL` with the value of your Root URL setting. Make sure the `groups` scope mapping is enabled in Authentik for the role map to function.
+:::
+
+:::tip Finding AdamRMS Role IDs
+To find the AdamRMS instance position IDs for your JSON role map, navigate to **Settings > Users** as an administrator. Right-click the **Role Group** dropdown for any user and select **Inspect Element**. The role IDs will be visible as the `value` attributes inside the `<option>` tags (e.g., `<option value="4">Crew Member</option>`).
 :::
 
 ---

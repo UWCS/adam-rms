@@ -7,6 +7,8 @@ $PAGEDATA['pageConfig'] = ["TITLE" => "Login"];
 $PAGEDATA['signupEnabled'] = $CONFIGCLASS->get("AUTH_SIGNUP_ENABLED") == 'Enabled';
 $PAGEDATA['googleAuthAvailable'] = $CONFIGCLASS->get("AUTH_PROVIDERS_GOOGLE_KEYS_ID") != false and $CONFIGCLASS->get("AUTH_PROVIDERS_GOOGLE_KEYS_SECRET") != false;
 $PAGEDATA['microsoftAuthAvailable'] = $CONFIGCLASS->get("AUTH_PROVIDERS_MICROSOFT_APP_ID") != false and $CONFIGCLASS->get("AUTH_PROVIDERS_MICROSOFT_KEYS_SECRET") != false;
+$PAGEDATA['authentikAuthAvailable'] = $CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_KEYS_ID") != false and $CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_KEYS_SECRET") != false and $CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_URL") != false and $CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_PROVIDER") != false;
+$PAGEDATA['authentikSignupEnabled'] = $CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_SIGNUP") == 'Enabled';
 
 
 if (isset($_GET['app-oauth'])) {

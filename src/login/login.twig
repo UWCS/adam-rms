@@ -6,6 +6,9 @@
     {% if microsoftAuthAvailable %}
     <a href="{{CONFIG.ROOTURL}}/login/oauth/microsoft.php" class="btn btn-default btn-lg m-2 border shadow-sm"><img src="{{ CONFIG.ROOTURL}}/static-assets/img/login/microsoft.svg" alt="" role="presentation" style="height: 1.2em; vertical-align: text-top;" /> Login{% if signupEnabled %} or Signup{% endif %} with Microsoft</a><br/>
     {% endif %}
+    {% if authentikAuthAvailable %}
+    <a href="{{CONFIG.ROOTURL}}/login/oauth/authentik.php" class="btn btn-default btn-lg m-2 border shadow-sm"> Login{% if authentikSignupEnabled %} or Signup{% endif %} with UWCS</a><br/>
+    {% endif %}
     {% if signupEnabled %}
     <a href="?signup" class="btn btn-default btn-lg m-2 border shadow-sm"><img src="{{ CONFIG.ROOTURL}}/static-assets/img/logoicon.png" alt="" role="presentation" style="height: 1.2em; vertical-align: text-top;" /> Create new {{ CONFIG.PROJECT_NAME }} account</a>
     <p>or</p>
