@@ -100,6 +100,7 @@ class Config
   {
     $formArray = [];
     foreach ($this->CONFIG_STRUCTURE as $key => $value) {
+      if (!isset($value['form'])) continue;
       $formArray[$key] = [
         "form" => $value['form'],
       ];
@@ -117,6 +118,7 @@ class Config
     $changesToMake = [];
     $errors = [];
     foreach ($this->CONFIG_STRUCTURE as $key => $value) {
+      if (!isset($value['form'])) continue;
       if (isset($formInput[$key])) {
         try {
           $currentValue = $this->get($key);
