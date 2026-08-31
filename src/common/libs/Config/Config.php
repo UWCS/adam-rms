@@ -151,6 +151,27 @@ class Config
       }
     }
     if (count($errors) > 0) return $errors;
+
+    // --- Authentik OIDC Discovery ---
+    if (isset($formInput['AUTH_PROVIDERS_AUTHENTIK_URL']) && isset($formInput['AUTH_PROVIDERS_AUTHENTIK_PROVIDER'])) {
+        $aUrl = $formInput['AUTH_PROVIDERS_AUTHENTIK_URL'];
+        $aProv = $formInput['AUTH_PROVIDERS_AUTHENTIK_PROVIDER'];
+        if (strlen($aUrl) > 0 && strlen($aProv) > 0) {
+            $discoveryUrl = rtrim($aUrl, '/') . '/application/o/' . $aProv . '/.well-known/openid-configuration';
+            $ch = curl_init($discoveryUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            $json = curl_exec($ch);
+            curl_close($ch);
+            $endpoints = $json ? json_decode($json, true) : null;
+            if ($endpoints && isset($endpoints['authorization_endpoint'], $endpoints['token_endpoint'], $endpoints['userinfo_endpoint'])) {
+                $changesToMake[] = ["config_key" => "AUTH_PROVIDERS_AUTHENTIK_AUTHORIZE_URL", "config_value" => $endpoints['authorization_endpoint']];
+                $changesToMake[] = ["config_key" => "AUTH_PROVIDERS_AUTHENTIK_TOKEN_URL", "config_value" => $endpoints['token_endpoint']];
+                $changesToMake[] = ["config_key" => "AUTH_PROVIDERS_AUTHENTIK_USERINFO_URL", "config_value" => $endpoints['userinfo_endpoint']];
+            }
+        }
+    }
+
     foreach ($changesToMake as $key => $value) {
       $update = $this->DBLIB->replace("config", $value);
       if (!$update) throw new Exception("Failed to update config value in database");

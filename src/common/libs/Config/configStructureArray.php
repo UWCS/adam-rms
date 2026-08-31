@@ -687,6 +687,21 @@ $configStructureArray = [
     "default" => "",
     "envFallback" => false,
   ],
+  "AUTH_PROVIDERS_AUTHENTIK_AUTHORIZE_URL" => [
+    "specialRequest" => false,
+    "default" => "",
+    "envFallback" => false,
+  ],
+  "AUTH_PROVIDERS_AUTHENTIK_TOKEN_URL" => [
+    "specialRequest" => false,
+    "default" => "",
+    "envFallback" => false,
+  ],
+  "AUTH_PROVIDERS_AUTHENTIK_USERINFO_URL" => [
+    "specialRequest" => false,
+    "default" => "",
+    "envFallback" => false,
+  ],
   "AUTH_SESSION_LENGTH_HOURS" => [
     "form" => [
       "type" => "text",

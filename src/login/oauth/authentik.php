@@ -20,6 +20,8 @@ class AdamRMSAuthentikProvider extends OAuth2
 {
     protected $scope = 'openid profile email groups';
 
+    protected $userinfoEndpoint;
+
     protected function configure()
     {
         parent::configure();
@@ -31,15 +33,29 @@ class AdamRMSAuthentikProvider extends OAuth2
             throw new InvalidApplicationCredentialsException('You must define Authentik provider slug');
         }
 
-        $base = rtrim($this->config->get('url'), '/') . '/application/o/' . $this->config->get('provider') . '/';
-        $this->apiBaseUrl = $base;
-        $this->authorizeUrl = $base . 'authorize/';
-        $this->accessTokenUrl = $base . 'token/';
+        $authUrl = $this->config->exists('AUTH_PROVIDERS_AUTHENTIK_AUTHORIZE_URL') ? $this->config->get('AUTH_PROVIDERS_AUTHENTIK_AUTHORIZE_URL') : '';
+        $tokenUrl = $this->config->exists('AUTH_PROVIDERS_AUTHENTIK_TOKEN_URL') ? $this->config->get('AUTH_PROVIDERS_AUTHENTIK_TOKEN_URL') : '';
+        $userinfoUrl = $this->config->exists('AUTH_PROVIDERS_AUTHENTIK_USERINFO_URL') ? $this->config->get('AUTH_PROVIDERS_AUTHENTIK_USERINFO_URL') : '';
+
+        if (strlen($authUrl) > 0 && strlen($tokenUrl) > 0 && strlen($userinfoUrl) > 0) {
+            $this->authorizeUrl = $authUrl;
+            $this->accessTokenUrl = $tokenUrl;
+            $this->userinfoEndpoint = $userinfoUrl;
+            // Hybridauth apiRequest supports absolute URLs, so setting apiBaseUrl is mostly cosmetic here
+            $this->apiBaseUrl = rtrim($this->config->get('url'), '/') . '/application/o/';
+        } else {
+            // Fallback to defaults if discovery wasn't populated in DB yet
+            $baseGlobal = rtrim($this->config->get('url'), '/') . '/application/o/';
+            $this->apiBaseUrl = $baseGlobal;
+            $this->authorizeUrl = $baseGlobal . 'authorize/';
+            $this->accessTokenUrl = $baseGlobal . 'token/';
+            $this->userinfoEndpoint = $baseGlobal . 'userinfo/';
+        }
     }
 
     public function getUserProfile()
     {
-        $response = $this->apiRequest('userinfo');
+        $response = $this->apiRequest($this->userinfoEndpoint);
         $data = new Data\Collection($response);
 
         if (!$data->exists('sub')) {
@@ -199,6 +215,9 @@ $configObject = [
     ],
     "scope" => $CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_SCOPE"),
     "supportRequestState" => true,
+    "AUTH_PROVIDERS_AUTHENTIK_AUTHORIZE_URL" => $CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_AUTHORIZE_URL"),
+    "AUTH_PROVIDERS_AUTHENTIK_TOKEN_URL" => $CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_TOKEN_URL"),
+    "AUTH_PROVIDERS_AUTHENTIK_USERINFO_URL" => $CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTIK_USERINFO_URL"),
 ];
 
 try {
