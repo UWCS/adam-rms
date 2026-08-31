@@ -166,8 +166,24 @@ class bID
 
             $instance['publicData'] = json_decode($instance['instances_publicConfig'],true);
             $instance['calendarSettings'] = json_decode($instance['instances_calendarConfig'], true);
-            $this->data['instances'][] = $instance;
-            array_push($this->data['instance_ids'], $instance['instances_id']);
+            
+            $id = $instance['instances_id'];
+            $found = false;
+            foreach ($this->data['instances'] as &$existingInstance) {
+                if ($existingInstance['instances_id'] == $id) {
+                    $existingInstance['permissions'] = array_values(array_unique(array_merge($existingInstance['permissions'], $instance['permissions'])));
+                    if ($existingInstance['userInstances_label'] !== $instance['userInstances_label']) {
+                        $existingInstance['userInstances_label'] .= ', ' . $instance['userInstances_label'];
+                    }
+                    $found = true;
+                    break;
+                }
+            }
+            
+            if (!$found) {
+                $this->data['instances'][] = $instance;
+                array_push($this->data['instance_ids'], $id);
+            }
         }
         
         $this->data['instance'] = false;
