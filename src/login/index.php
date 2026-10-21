@@ -13,11 +13,8 @@ $PAGEDATA['authentikSignupEnabled'] = $CONFIGCLASS->get("AUTH_PROVIDERS_AUTHENTI
 
 if (isset($_GET['app-oauth'])) {
 	$_SESSION['return'] = false;
-	if (isset($_GET['returnHost'])) {
-		$_SESSION['app-oauth'] = 'https://' . $_GET['returnHost'] . '/';
-	} else {
-		$_SESSION['app-oauth'] = "com.bstudios.adamrms://";
-	}
+	// Always the app's own scheme - the token must never go to a host named in the link
+	$_SESSION['app-oauth'] = "com.bstudios.adamrms://";
 	if ($GLOBALS['AUTH']->login) {
 		$AUTH->logout();
 	}
